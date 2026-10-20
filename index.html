@@ -137,15 +137,18 @@ var overrides = store.get('wp:rest', {});     // exercise name -> rest seconds
 var roundsPref = store.get('wp:rounds', {});  // hiit id -> rounds
 var lastMap = store.get('wp:last', {});       // exercise name -> {kg, reps}
 var hist = store.get('wp:hist', []);          // finished sessions
+(function(){ var ren = {'Back squat or leg press':'Leg press', 'Calf raise':'Standing calf raise'}, ch = false;
+  for(var o in ren){ if(lastMap[o] && !lastMap[ren[o]]){ lastMap[ren[o]] = lastMap[o]; ch = true; } }
+  if(ch) store.set('wp:last', lastMap); })();
 
 /* ---------- workout data ---------- */
 var LIFTS = [
   { id:'ua', name:'Upper A', kind:'lift', items:[
     {n:'Incline dumbbell press', s:3, r:'6-10', rest:120},
-    {n:'Chest-supported row', s:3, r:'8-12', rest:90},
+    {n:'Chest-supported row', s:3, r:'8-12', rest:90, tip:'Dumbbells, chest on the incline bench'},
     {n:'Overhead press', s:3, r:'8-10', rest:120},
     {n:'Lat pulldown', s:2, r:'10-15', rest:60, ss:'a'},
-    {n:'Lateral raise', s:2, r:'10-15', rest:60, ss:'a'},
+    {n:'Lateral raise', s:2, r:'10-15', rest:60, ss:'a', tip:'Dumbbells, beside the pulldown'},
     {n:'Rear delt fly (reverse pec deck)', s:2, r:'12-15', rest:60, ss:'b'},
     {n:'Dumbbell shrug', s:2, r:'12-15', rest:60, ss:'b'},
     {n:'Skull-crusher', s:2, r:'10-15', rest:60, ss:'c'},
@@ -154,34 +157,40 @@ var LIFTS = [
     {n:'Pallof press', s:2, r:'10/side', rest:60}
   ]},
   { id:'la', name:'Lower A', kind:'lift', items:[
-    {n:'Back squat or leg press', s:3, r:'6-10', rest:150},
+    {n:'Leg press', s:3, r:'6-10', rest:150, tip:'Knees to about 90°, lower back stays on the pad. Taken? Heavy goblet squat, 10-15 reps'},
     {n:'Cable pull-through', s:3, r:'10-12', rest:90},
     {n:'Split squat', s:2, r:'10/side', rest:90},
     {n:'Seated leg curl', s:3, r:'10-12', rest:90},
-    {n:'Calf raise', s:2, r:'12-15', rest:60, ss:'a'},
+    {n:'Standing calf raise', s:2, r:'12-15', rest:60, ss:'a'},
     {n:'Hanging leg raise', s:2, r:'10-15', rest:60, ss:'a'},
     {n:'Hip abduction machine', s:2, r:'12-15', rest:60, ss:'b'},
-    {n:'Tibialis raise', s:2, r:'15-20', rest:60, ss:'b'}
+    {n:'Tibialis raise', s:2, r:'15-20', rest:60, ss:'b'},
+    {n:'Band shrug', s:2, r:'15-20', rest:60, ss:'c', tip:'Stand on the band, hands at your sides. Hold 1 s at the top'},
+    {n:'Band curl', s:2, r:'12-20', rest:60, ss:'c', tip:'Stand on the band. Squeeze 1 s at the top, slow lowering'}
   ]},
   { id:'ub', name:'Upper B', kind:'lift', items:[
-    {n:'Pull-up', s:3, r:'6-10', rest:120},
+    {n:'Pull-up', s:3, r:'6-10', rest:120, tip:'Use the assist machine if needed, a little less assist each week'},
     {n:'Bench press', s:3, r:'6-10', rest:120},
-    {n:'Dips', s:3, r:'6-12', rest:120},
+    {n:'Dips', s:3, r:'6-12', rest:120, tip:'Assist machine if needed. If dips stall, drop to 2 sets'},
     {n:'Single-arm dumbbell row', s:3, r:'8-12/side', rest:90},
     {n:'Face pull', s:2, r:'12-15', rest:60, ss:'a'},
     {n:'Hammer curl', s:2, r:'10-15', rest:60, ss:'a'},
     {n:'Straight-arm pulldown', s:2, r:'12-15', rest:60, ss:'b'},
     {n:'Cable external rotation', s:2, r:'12-15/side', rest:60, ss:'b'},
-    {n:'Cable crunch', s:2, r:'12-15', rest:60}
+    {n:'Torso rotation machine', s:2, r:'10-12/side', rest:60, ss:'c', tip:'Light and controlled, turn from the upper back, stop short of your end range. Taken? Cable woodchop'},
+    {n:'Cable crunch', s:2, r:'12-15', rest:60, ss:'c'}
   ]},
   { id:'lb', name:'Lower B', kind:'lift', items:[
-    {n:'Hip thrust', s:3, r:'6-10', rest:150},
+    {n:'Hip thrust', s:3, r:'6-10', rest:150, tip:'Heavy dumbbell across the hips. Once 3x10 at 50 kg is easy, add a 2 s squeeze at the top'},
     {n:'Bulgarian split squat', s:3, r:'8-10/side', rest:90},
     {n:'Lying leg curl', s:3, r:'10-12', rest:90},
-    {n:"Farmer's carry", s:2, r:'30-40 m', rest:60, ss:'a', u:'m'},
-    {n:'Side plank', s:2, r:'30 s/side', rest:60, ss:'a', u:'s'},
-    {n:'Adductor machine', s:2, r:'12-15', rest:60, ss:'b'},
-    {n:'Dead bug', s:2, r:'10/side', rest:60, ss:'b'}
+    {n:'45° back extension', s:2, r:'12-15', rest:75, tip:'Glute-focused: upper back slightly rounded, squeeze glutes at the top'},
+    {n:'Leg extension', s:2, r:'10-15', rest:60, ss:'a'},
+    {n:'Standing calf raise', s:2, r:'12-15', rest:60, ss:'a'},
+    {n:"Farmer's carry", s:2, r:'30-40 m', rest:60, ss:'b', u:'m'},
+    {n:'Side plank', s:2, r:'30 s/side', rest:60, ss:'b', u:'s'},
+    {n:'Adductor machine', s:2, r:'12-15', rest:60, ss:'c'},
+    {n:'Dead bug', s:2, r:'10/side', rest:60, ss:'c'}
   ]}
 ];
 var HOME_TIP = 'No gym needed: bands, a backpack and a chair. Warm up 5 min. Progress with slower lowering, pauses, more reps or a heavier backpack.';
@@ -207,7 +216,9 @@ var HOMEL = [
     {n:'Single-leg calf raise (on a step)', s:2, r:'12-20', rest:60, ss:'a'},
     {n:'Lying leg raise', s:2, r:'10-15', rest:60, ss:'a'},
     {n:'Side-lying hip abduction (band)', s:2, r:'12-15/side', rest:60, ss:'b'},
-    {n:'Tibialis raise (back to wall)', s:2, r:'15-20', rest:60, ss:'b'}
+    {n:'Tibialis raise (back to wall)', s:2, r:'15-20', rest:60, ss:'b'},
+    {n:'Band shrug', s:2, r:'15-20', rest:60, ss:'c', tip:'Stand on the band, hands at your sides. Hold 1 s at the top'},
+    {n:'Band curl', s:2, r:'12-20', rest:60, ss:'c', tip:'Stand on the band. Squeeze 1 s at the top, slow lowering'}
   ]},
   { id:'hub', name:'Home Upper B', kind:'lift', tip:HOME_TIP, items:[
     {n:'Doorway pull-up or inverted row', s:3, r:'6-10', rest:120},
@@ -218,7 +229,8 @@ var HOMEL = [
     {n:'Hammer curl (backpack or band)', s:2, r:'10-15', rest:60, ss:'a'},
     {n:'Band straight-arm pulldown', s:2, r:'12-15', rest:60, ss:'b'},
     {n:'Band external rotation', s:2, r:'12-15/side', rest:60, ss:'b'},
-    {n:'Reverse crunch', s:2, r:'12-15', rest:60}
+    {n:'Band rotation (door anchor)', s:2, r:'10-12/side', rest:60, ss:'c', tip:'Arms straight, turn from the upper back, hips stay square. Slow return'},
+    {n:'Reverse crunch', s:2, r:'12-15', rest:60, ss:'c'}
   ]},
   { id:'hlb', name:'Home Lower B', kind:'lift', tip:HOME_TIP, items:[
     {n:'Single-leg hip thrust (backpack)', s:3, r:'8-12/side', rest:120},
@@ -270,13 +282,13 @@ function buildSteps(items){
     if(row.role==='a'){
       var a = row.it, b = rows[r+1].it;
       for(s=0;s<a.s;s++){
-        steps.push({n:a.n, set:s+1, sets:a.s, r:a.r, u:a.u, rest:15, swap:true, note:'Superset with '+b.n+'. Go straight to it.'});
-        steps.push({n:b.n, set:s+1, sets:b.s, r:b.r, u:b.u, rest:restFor(b), note:'Superset with '+a.n});
+        steps.push({n:a.n, set:s+1, sets:a.s, r:a.r, u:a.u, rest:15, swap:true, note:(a.tip?a.tip+'. ':'')+'Superset with '+b.n+'. Go straight to it.'});
+        steps.push({n:b.n, set:s+1, sets:b.s, r:b.r, u:b.u, rest:restFor(b), note:(b.tip?b.tip+'. ':'')+'Superset with '+a.n});
       }
       r++;
     } else {
       var it = row.it;
-      for(s=0;s<it.s;s++) steps.push({n:it.n, set:s+1, sets:it.s, r:it.r, u:it.u, rest:restFor(it)});
+      for(s=0;s<it.s;s++) steps.push({n:it.n, set:s+1, sets:it.s, r:it.r, u:it.u, rest:restFor(it), note:it.tip});
     }
   }
   return steps;

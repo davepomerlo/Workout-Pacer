@@ -1,6 +1,6 @@
 // Workout Pacer — offline app shell cache.
 // Bump this version string whenever any cached file changes, so clients pick up the update.
-var CACHE = 'workout-pacer-v1';
+var CACHE = 'workout-pacer-v6';
 var ASSETS = [
   './',
   './index.html',
